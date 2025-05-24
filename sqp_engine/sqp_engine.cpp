@@ -2,6 +2,14 @@
 
 namespace sqp_engine
 {
+    const double SolverParameters::DEFAULT_RANK_TOLERANCE = 1e-7;
+    const OmegaNullspaceMethod SolverParameters::DEFAULT_OMEGA_NULLSPACE_METHOD = OmegaNullspaceMethod::RRQR;
+    const double SolverParameters::DEFAULT_ORTHOGONALITY_SQUARED_ERROR_THRESHOLD = 1e-8;
+    const double SolverParameters::DEFAULT_EQUAL_VECTORS_SQUARED_DIFF = 1e-10;
+    const double SolverParameters::DEFAULT_EQUAL_SQUARED_ERRORS_DIFF = 1e-6;
+    const double SolverParameters::PI = 3.14159265358979323846;
+    static const double DEFAULT_PNL_CHEIRALITY_FOV = SolverParameters::PI / 4;
+
     const double SQPConfig::DEFAULT_SQP_SQUARED_TOLERANCE = 1e-10;
     const double SQPConfig::DEFAULT_SQP_DET_THRESHOLD = 1.001;
     const NearestRotationMethod SQPConfig::DEFAULT_NEAREST_ROTATION_METHOD = NearestRotationMethod::FOAM;

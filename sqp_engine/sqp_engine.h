@@ -9,6 +9,7 @@
 //
 // 2. "Fast and Consistently Accurate Perspective-n-Line Pose Estimation"
 //     Paper: https://www.researchgate.net/publication/386377725_Fast_and_Consistently_Accurate_Perspective-n-Line_Pose_Estimation
+//     Supplementary: https://www.researchgate.net/publication/391902738_sqpnl_supplementarypdf
 //
 // George Terzakis (terzakig-at-hotmail-dot-com), September 2020 (revised, May, 2025)
 // Optimizations by Manolis Lourakis, February 2022, February 2024
@@ -27,6 +28,14 @@ namespace sqp_engine
     enum class NearestRotationMethod
     {
         FOAM,
+        SVD
+    };
+
+    //! Method for the decomposition of Omega
+    enum class OmegaNullspaceMethod
+    {
+        RRQR,
+        CPRRQR,
         SVD
     };
 
@@ -61,6 +70,7 @@ namespace sqp_engine
      */
     void NearestRotationMatrix_FOAM(const Eigen::Matrix<double, 9, 1> &e, Eigen::Matrix<double, 9, 1> &r);
 
+    //! SQP configuration
     struct SQPConfig
     {
         //! Default method for nearest rotation method
@@ -102,6 +112,38 @@ namespace sqp_engine
         }
     };
 
+    //! Solver parameters (include SQP config)
+    struct SolverParameters
+    {
+        //! rank tolerance in orthogonality checks
+        static const double DEFAULT_RANK_TOLERANCE;
+        double rank_tolerance = DEFAULT_RANK_TOLERANCE;
+        //! Squared error in orthogonality checks
+        static const double DEFAULT_ORTHOGONALITY_SQUARED_ERROR_THRESHOLD;
+        double orthogonality_squared_error_threshold = DEFAULT_ORTHOGONALITY_SQUARED_ERROR_THRESHOLD;
+
+        //! Null space method for 9x9 data matrix
+        static const OmegaNullspaceMethod DEFAULT_OMEGA_NULLSPACE_METHOD;
+        OmegaNullspaceMethod omega_nullspace_method = DEFAULT_OMEGA_NULLSPACE_METHOD;
+
+        //! Threshold in equality checks for solution vectors
+        static const double DEFAULT_EQUAL_VECTORS_SQUARED_DIFF;
+        double equal_vectors_squared_diff = DEFAULT_EQUAL_VECTORS_SQUARED_DIFF;
+        //! Threshold in equality check between errors
+        static const double DEFAULT_EQUAL_SQUARED_ERRORS_DIFF;
+        double equal_squared_errors_diff = DEFAULT_EQUAL_SQUARED_ERRORS_DIFF;
+
+        //! SQP settings
+        SQPConfig sqp_config = SQPConfig();
+
+        //! CHeck cheirality
+        bool enable_cheirality_check = true;
+        //! For cheirality checks in PnL
+        static const double PI;
+        static const double DEFAULT_PNL_CHEIRALITY_FOV;
+        double pnl_cheirality_fov = DEFAULT_PNL_CHEIRALITY_FOV;
+    };
+
     /**
      * @brief Contains an SQP rotation matrix solution
      */
@@ -113,6 +155,21 @@ namespace sqp_engine
         int num_iterations;
         double sq_error;
     };
+
+    inline std::ostream &operator<<(std::ostream &os, const SQPSolution &solution)
+    {
+        return os << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+                  << "R: [ " << solution.r_hat[0] << ", " << solution.r_hat[1] << ", " << solution.r_hat[2] << ";\n"
+                  << "     " << solution.r_hat[3] << ", " << solution.r_hat[4] << ", " << solution.r_hat[5] << ";\n"
+                  << "     " << solution.r_hat[6] << ", " << solution.r_hat[7] << ", " << solution.r_hat[8] << " ]\n"
+                  << "t: " << "[ " << solution.t[0] << "; " << solution.t[1] << "; " << solution.t[2] << " ]\n"
+                  << "r: " << "[ " << solution.r_hat[0] << "; " << solution.r_hat[1] << "; " << solution.r_hat[2] << "; "
+                  << solution.r_hat[3] << "; " << solution.r_hat[4] << "; " << solution.r_hat[5] << "; "
+                  << solution.r_hat[6] << "; " << solution.r_hat[7] << "; " << solution.r_hat[8] << " ]\n"
+                  << "squared error: " << solution.sq_error << "\n"
+                  << "number of SQP iterations : " << solution.num_iterations << "\n"
+                  << "-------------------------------------------------------------------------------------------------\n";
+    }
 
     //! Determinant of a matrix stored in a 9x1 row-major vector
     double Determinant9x1(const Eigen::Matrix<double, 9, 1> &r);
@@ -126,7 +183,7 @@ namespace sqp_engine
         Eigen::Matrix<double, 3, 3> &Qinv,   //
         const double &det_threshold = 1e-10);
 
-        /**
+    /**
      * @brief Produce a distance from being orthogonal for a random 3x3 matrix (passed as a row-major 9x1 vector)
      *
      * @param a The 9x1 unrolled matrix vector
