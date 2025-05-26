@@ -140,8 +140,6 @@ namespace sqp_engine
         bool enable_cheirality_check = true;
         //! For cheirality checks in PnL
         static const double PI;
-        static const double DEFAULT_PNL_CHEIRALITY_FOV;
-        double pnl_cheirality_fov = DEFAULT_PNL_CHEIRALITY_FOV;
     };
 
     /**
@@ -170,6 +168,9 @@ namespace sqp_engine
                   << "number of SQP iterations : " << solution.num_iterations << "\n"
                   << "-------------------------------------------------------------------------------------------------\n";
     }
+
+    //! Transpose a rotation vector (to another rotation vector via regular 3x3 matrix transposition)
+    Eigen::Vector<double, 9> TransposeRotationVector(const Eigen::Vector<double, 9> &r);
 
     //! Determinant of a matrix stored in a 9x1 row-major vector
     double Determinant9x1(const Eigen::Matrix<double, 9, 1> &r);
