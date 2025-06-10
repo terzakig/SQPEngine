@@ -13,9 +13,9 @@ namespace sqp_engine
     const double SQPConfig::DEFAULT_SQP_DET_THRESHOLD = 1.001;
     const NearestRotationMethod SQPConfig::DEFAULT_NEAREST_ROTATION_METHOD = NearestRotationMethod::FOAM;
 
-    Eigen::Vector<double, 9> TransposeRotationVector(const Eigen::Vector<double, 9> &r)
+    Eigen::Matrix<double, 9, 1> TransposeRotationVector(const Eigen::Matrix<double, 9, 1> &r)
     {
-        Eigen::Vector<double, 9> rt;
+        Eigen::Matrix<double, 9, 1> rt;
         rt << r[0], r[3], r[6], //
             r[1], r[4], r[7],   //
             r[2], r[5], r[8];

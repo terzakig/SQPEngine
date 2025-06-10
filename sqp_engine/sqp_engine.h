@@ -8,8 +8,8 @@
 //     b) Supplementary: https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123460460-supp.pdf
 //
 // 2. "Fast and Consistently Accurate Perspective-n-Line Pose Estimation"
-//     Paper: https://www.researchgate.net/publication/386377725_Fast_and_Consistently_Accurate_Perspective-n-Line_Pose_Estimation
-//     Supplementary: https://www.researchgate.net/publication/391902738_sqpnl_supplementarypdf
+//     a) Paper:         https://www.researchgate.net/publication/386377725_Fast_and_Consistently_Accurate_Perspective-n-Line_Pose_Estimation
+//     b) Supplementary: https://www.researchgate.net/publication/391902738_sqpnl_supplementarypdf
 //
 // George Terzakis (terzakig-at-hotmail-dot-com), September 2020 (revised, May, 2025)
 // Optimizations by Manolis Lourakis, February 2022, February 2024
@@ -170,7 +170,7 @@ namespace sqp_engine
     }
 
     //! Transpose a rotation vector (to another rotation vector via regular 3x3 matrix transposition)
-    Eigen::Vector<double, 9> TransposeRotationVector(const Eigen::Vector<double, 9> &r);
+    Eigen::Matrix<double, 9, 1> TransposeRotationVector(const Eigen::Matrix<double, 9, 1> &r);
 
     //! Determinant of a matrix stored in a 9x1 row-major vector
     double Determinant9x1(const Eigen::Matrix<double, 9, 1> &r);
@@ -245,7 +245,7 @@ namespace sqp_engine
      * @brief Solve the SQP system **efficiently** (avoids inversion; executed in each SQP step).
      *
      * @param Omega The original QCQP matrix.
-     * @param r The current rotation estimate as a 9x1 row-mapor vector
+     * @param r The current rotation estimate as a 9x1 row-major vector
      * @param delta Stores the return perturbation of r (the solution of the system)
      */
     void SolveSQPSystem(const Eigen::Matrix<double, 9, 9> &Omega, const Eigen::Matrix<double, 9, 1> &r, Eigen::Matrix<double, 9, 1> &delta);
