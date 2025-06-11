@@ -105,7 +105,7 @@ namespace sqp_engine
             {
                 NearestRotationMatrix = NearestRotationMatrix_FOAM;
             }
-            else // if ( parameters_.nearest_rotation_method == NearestRotationMethod::SVD )
+            else // if ( _nearest_rotation_method == NearestRotationMethod::SVD )
             {
                 NearestRotationMatrix = NearestRotationMatrix_SVD;
             }
@@ -136,10 +136,42 @@ namespace sqp_engine
         //! SQP settings
         SQPConfig sqp_config = SQPConfig();
 
-        //! CHeck cheirality
+        //! Check cheirality
         bool enable_cheirality_check = true;
         //! For cheirality checks in PnL
         static const double PI;
+
+        //! Compute Omega's null space based on the method specified by omega_nullspace_method
+        void computeNullSpace(const Eigen::Matrix<double, 9, 9>& Omega, Eigen::Matrix<double, 9, 9>& U, Eigen::Matrix<double, 9, 1>& s) const
+        {
+            if ( omega_nullspace_method == OmegaNullspaceMethod::RRQR )
+            {
+                // Rank revealing QR nullspace computation with full pivoting.
+                // This is slightly less accurate compared to SVD but x2 faster
+                Eigen::FullPivHouseholderQR<Eigen::Matrix<double, 9, 9> > rrqr(Omega);
+                U = rrqr.matrixQ();
+
+                Eigen::Matrix<double, 9, 9> R = rrqr.matrixQR().template triangularView<Eigen::Upper>();
+                s = R.diagonal().array().abs();
+            }
+            else if ( omega_nullspace_method == OmegaNullspaceMethod::CPRRQR )
+            {
+                // Rank revealing QR nullspace computation with column pivoting.
+                // This is potentially less accurate compared to RRQR but faster
+                Eigen::ColPivHouseholderQR<Eigen::Matrix<double, 9, 9> > cprrqr(Omega);
+                U = cprrqr.householderQ();
+
+                Eigen::Matrix<double, 9, 9> R = cprrqr.matrixR().template triangularView<Eigen::Upper>();
+                s = R.diagonal().array().abs();
+            }
+            else // if ( omega_nullspace_method == OmegaNullspaceMethod::SVD )
+            {
+                // SVD-based nullspace computation. This is the most accurate but slowest option
+                Eigen::JacobiSVD<Eigen::Matrix<double, 9, 9>> svd(Omega, Eigen::ComputeFullU);
+                U = svd.matrixU();
+                s = svd.singularValues();
+            }
+        }
     };
 
     /**
