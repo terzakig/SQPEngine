@@ -295,7 +295,7 @@ namespace sqp_engine
         H(7, 4) = r[4] - dot_j5q3 * H(7, 2);
         H(8, 4) = r[5] - dot_j5q3 * H(8, 2);
 
-        H.block<9, 1>(0, 4) *= (1.0 / H.col(4).norm());
+        H.col(4).normalize();
 
         K(4, 0) = 0;
         K(4, 1) = r[6] * H(3, 1) + r[7] * H(4, 1) + r[8] * H(5, 1);
@@ -321,7 +321,7 @@ namespace sqp_engine
         H(7, 5) = r[1] - dot_j6q3 * H(7, 2) - dot_j6q5 * H(7, 4);
         H(8, 5) = r[2] - dot_j6q3 * H(8, 2) - dot_j6q5 * H(8, 4);
 
-        H.block<9, 1>(0, 5) *= (1.0 / H.col(5).norm());
+        H.col(5).normalize();
 
         K(5, 0) = r[6] * H(0, 0) + r[7] * H(1, 0) + r[8] * H(2, 0);
         K(5, 1) = 0;
@@ -358,8 +358,8 @@ namespace sqp_engine
                 }
             }
         }
-        const auto &v1 = Pn.block<9, 1>(0, index1);
-        N.block<9, 1>(0, 0) = v1 * (1.0 / max_norm1);
+        const auto &v1 = Pn.col(index1);
+        N.col(0) = v1 * (1.0 / max_norm1);
         col_norms[index1] = -1.0; // mark to avoid use in subsequent loops
 
         for (int i = 0; i < 9; i++)
@@ -376,9 +376,9 @@ namespace sqp_engine
                 }
             }
         }
-        const auto &v2 = Pn.block<9, 1>(0, index2);
-        N.block<9, 1>(0, 1) = v2 - v2.dot(N.col(0)) * N.col(0);
-        N.block<9, 1>(0, 1) *= (1.0 / N.col(1).norm());
+        const auto &v2 = Pn.col(index2);
+        N.col(1) = v2 - v2.dot(N.col(0)) * N.col(0);
+        N.col(1).normalize();
         col_norms[index2] = -1.0; // mark to avoid use in loop below
 
         for (int i = 0; i < 9; i++)
@@ -399,10 +399,9 @@ namespace sqp_engine
         }
 
         // Now orthogonalize the remaining 2 vectors v2, v3 into N
-        const auto &v3 = Pn.block<9, 1>(0, index3);
-
-        N.block<9, 1>(0, 2) = v3 - (v3.dot(N.col(1)) * N.col(1)) - (v3.dot(N.col(0)) * N.col(0));
-        N.block<9, 1>(0, 2) *= (1.0 / N.col(2).norm());
+        const auto &v3 = Pn.col(index3);
+        N.col(2) = v3 - (v3.dot(N.col(1)) * N.col(1)) - (v3.dot(N.col(0)) * N.col(0));
+        N.col(2).normalize();
     }
 
     int AxbSolveLDLt3x3(                      //
