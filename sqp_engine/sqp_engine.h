@@ -181,7 +181,7 @@ namespace sqp_engine
     {
         Eigen::Matrix<double, 9, 1> r;     // Actual matrix upon convergence
         Eigen::Matrix<double, 9, 1> r_hat; // "Clean" (nearest) rotation matrix
-        Eigen::Matrix<double, 3, 1> t;
+        Eigen::Vector3d t;
         int num_iterations;
         double sq_error;
     };
@@ -208,12 +208,12 @@ namespace sqp_engine
     double Determinant9x1(const Eigen::Matrix<double, 9, 1> &r);
 
     //! Determinant of 3x3 matrix
-    double Determinant3x3(const Eigen::Matrix<double, 3, 3> &M);
+    double Determinant3x3(const Eigen::Matrix3d &M);
 
     //! Invert a 3x3 symmetric matrix (using low triangle values only)
-    bool InvertSymmetric3x3(                 //
-        const Eigen::Matrix<double, 3, 3> Q, //
-        Eigen::Matrix<double, 3, 3> &Qinv,   //
+    bool InvertSymmetric3x3(     //
+        const Eigen::Matrix3d Q, //
+        Eigen::Matrix3d &Qinv,   //
         const double &det_threshold = 1e-10);
 
     /**
@@ -268,10 +268,10 @@ namespace sqp_engine
      * @param x The solution
      * @return The function returns 0 if successful, non-zero otherwise
      */
-    int AxbSolveLDLt3x3(                      //
-        const Eigen::Matrix<double, 3, 3> &A, //
-        const Eigen::Matrix<double, 3, 1> &b, //
-        Eigen::Matrix<double, 3, 1> &x);
+    int AxbSolveLDLt3x3(          //
+        const Eigen::Matrix3d &A, //
+        const Eigen::Vector3d &b, //
+        Eigen::Vector3d &x);
 
     /**
      * @brief Solve the SQP system **efficiently** (avoids inversion; executed in each SQP step).
