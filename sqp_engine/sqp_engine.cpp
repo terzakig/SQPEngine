@@ -85,10 +85,6 @@ namespace sqp_engine
     }
 
 #if 0
-    // EVD-based nearest rotation matrix. The nearest rotation matrix is given by B*inv(sqrtm(B'*B)).
-    // If B'*B = U*T*U' is the eigendecomposition, the square root simplifies to sqrtm(B'*B) = (B'*B)^(1/2) = U*T^(1/2)*U'
-    // and thus B*inv(sqrtm(B'*B)) equals B*U*T^(-1/2)*U'
-    // See https://people.eecs.berkeley.edu/~wkahan/Math128/NearestQ.pdf
     void NearestRotationMatrix_EVD(const Eigen::Matrix<double, 9, 1>& e, Eigen::Matrix<double, 9, 1>& r)
     {
       const Eigen::Map<const Eigen::Matrix3d> B(e.data(), 3, 3);
