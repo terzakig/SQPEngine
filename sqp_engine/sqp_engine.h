@@ -118,8 +118,8 @@ namespace sqp_engine
         }
     };
 
-    //! Solver parameters (include SQP config)
-    struct SolverParameters
+    //! Engine parameters (include SQP config)
+    struct EngineParameters
     {
         //! rank tolerance in orthogonality checks
         static const double DEFAULT_RANK_TOLERANCE;
