@@ -5,7 +5,7 @@ add_library (SQPEngine
             sqp_engine/sqp_engine.cpp)
 
 set(CXX_FLAGS "-Wall")
-set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 SET(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} )
 
