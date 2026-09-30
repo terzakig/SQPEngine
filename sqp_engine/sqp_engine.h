@@ -36,6 +36,7 @@ namespace sqp_engine
     {
         RRQR,
         CPRRQR,
+        EIG,
         SVD
     };
 
@@ -156,9 +157,7 @@ namespace sqp_engine
                 // This is slightly less accurate compared to SVD but x2 faster
                 Eigen::FullPivHouseholderQR<Eigen::Matrix<double, 9, 9> > rrqr(Omega);
                 U = rrqr.matrixQ();
-
-                Eigen::Matrix<double, 9, 9> R = rrqr.matrixQR().template triangularView<Eigen::Upper>();
-                s = R.diagonal().array().abs();
+                s = rrqr.matrixQR().diagonal().cwiseAbs();
             }
             else if ( omega_nullspace_method == OmegaNullspaceMethod::CPRRQR )
             {
@@ -166,9 +165,15 @@ namespace sqp_engine
                 // This is potentially less accurate compared to RRQR but faster
                 Eigen::ColPivHouseholderQR<Eigen::Matrix<double, 9, 9> > cprrqr(Omega);
                 U = cprrqr.householderQ();
-
-                Eigen::Matrix<double, 9, 9> R = cprrqr.matrixR().template triangularView<Eigen::Upper>();
-                s = R.diagonal().array().abs();
+                s = cprrqr.matrixQR().diagonal().cwiseAbs();
+            }
+            else if ( omega_nullspace_method == OmegaNullspaceMethod::EIG )
+            {
+                // Symmetric eigen-decomposition; eigenvalues are in ascending order and must be reversed.
+                // This is more accurate than RRQR but slower
+                Eigen::SelfAdjointEigenSolver<Eigen::Matrix<double, 9, 9>> es(Omega);
+                U = es.eigenvectors().rowwise().reverse();
+                s = es.eigenvalues().reverse().cwiseAbs();
             }
             else // if ( omega_nullspace_method == OmegaNullspaceMethod::SVD )
             {
