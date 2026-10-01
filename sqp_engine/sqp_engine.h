@@ -204,9 +204,9 @@ namespace sqp_engine
                   << "     " << solution.r_hat[3] << ", " << solution.r_hat[4] << ", " << solution.r_hat[5] << ";\n"
                   << "     " << solution.r_hat[6] << ", " << solution.r_hat[7] << ", " << solution.r_hat[8] << " ]\n"
                   << "t: " << "[ " << solution.t[0] << "; " << solution.t[1] << "; " << solution.t[2] << " ]\n"
-                  << "r: " << "[ " << solution.r_hat[0] << "; " << solution.r_hat[1] << "; " << solution.r_hat[2] << "; "
-                  << solution.r_hat[3] << "; " << solution.r_hat[4] << "; " << solution.r_hat[5] << "; "
-                  << solution.r_hat[6] << "; " << solution.r_hat[7] << "; " << solution.r_hat[8] << " ]\n"
+                  << "r (raw): " << "[ " << solution.r[0] << "; " << solution.r[1] << "; " << solution.r[2] << "; "
+                  << solution.r[3] << "; " << solution.r[4] << "; " << solution.r[5] << "; "
+                  << solution.r[6] << "; " << solution.r[7] << "; " << solution.r[8] << " ]\n"
                   << "squared error: " << solution.sq_error << "\n"
                   << "number of SQP iterations : " << solution.num_iterations << "\n"
                   << "-------------------------------------------------------------------------------------------------\n";
