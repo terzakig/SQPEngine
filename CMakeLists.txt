@@ -3,11 +3,9 @@ project(SQPEngine)
 add_library (SQPEngine 
             sqp_engine/sqp_engine.h 
             sqp_engine/sqp_engine.cpp)
+target_compile_options(SQPEngine PRIVATE -Wall)
 
-set(CXX_FLAGS "-Wall")
-set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
-
-SET(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} )
+set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} )
 
 
 find_package(Eigen3 REQUIRED)
