@@ -94,8 +94,8 @@ namespace sqp_engine
 
         //! Construct an SQPConfig struct
         inline SQPConfig(                                                                                                                             //
-            const double &_sqp_squared_tolerance = DEFAULT_SQP_SQUARED_TOLERANCE,                                                                     //
-            const double &_sqp_det_threshold = DEFAULT_SQP_DET_THRESHOLD,                                                                             //
+            const double _sqp_squared_tolerance = DEFAULT_SQP_SQUARED_TOLERANCE,                                                                      //
+            const double _sqp_det_threshold = DEFAULT_SQP_DET_THRESHOLD,                                                                              //
             const int _sqp_max_iteration = DEFAULT_SQP_MAX_ITERATION,                                                                                 //
             const NearestRotationMethod &_nearest_rotation_method = DEFAULT_NEAREST_ROTATION_METHOD) : sqp_squared_tolerance(_sqp_squared_tolerance), //
                                                                                                        sqp_det_threshold(_sqp_det_threshold),         //
@@ -222,10 +222,10 @@ namespace sqp_engine
     double Determinant3x3(const Eigen::Matrix3d &M);
 
     //! Invert a 3x3 symmetric matrix (using low triangle values only)
-    bool InvertSymmetric3x3(     //
-        const Eigen::Matrix3d Q, //
-        Eigen::Matrix3d &Qinv,   //
-        const double &det_threshold = 1e-10);
+    bool InvertSymmetric3x3(      //
+        const Eigen::Matrix3d &Q, //
+        Eigen::Matrix3d &Qinv,    //
+        double det_threshold = 1e-10);
 
     /**
      * @brief Produce a distance from being orthogonal for a random 3x3 matrix (passed as a row-major 9x1 vector)
@@ -253,7 +253,7 @@ namespace sqp_engine
         Eigen::Matrix<double, 9, 6> &H,           // Row space
         Eigen::Matrix<double, 9, 3> &N,           // Null space
         Eigen::Matrix<double, 6, 6> &K,           // J*Q (J - Jacobian of constraints)
-        const double &norm_threshold = 0.1        // Used to discard columns of Pn when finding null space threshold for column vector norm (of Pn)
+        double norm_threshold = 0.1               // Used to discard columns of Pn when finding null space threshold for column vector norm (of Pn)
     );
 
     // Solve A*x=b for 3x3 SPD A.

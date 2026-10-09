@@ -32,10 +32,10 @@ namespace sqp_engine
         return M(0, 0) * (M(1, 1) * M(2, 2) - M(1, 2) * M(2, 1)) - M(0, 1) * (M(1, 0) * M(2, 2) - M(1, 2) * M(2, 0)) + M(0, 2) * (M(1, 0) * M(2, 1) - M(1, 1) * M(2, 0));
     }
 
-    bool InvertSymmetric3x3(     //
-        const Eigen::Matrix3d Q, //
-        Eigen::Matrix3d &Qinv,   //
-        const double &det_threshold)
+    bool InvertSymmetric3x3(      //
+        const Eigen::Matrix3d &Q, //
+        Eigen::Matrix3d &Qinv,    //
+        double det_threshold)
     {
         // 1. Get the elements of the matrix
         double a = Q(0, 0),
@@ -217,7 +217,7 @@ namespace sqp_engine
         Eigen::Matrix<double, 9, 6> &H,           // Row space
         Eigen::Matrix<double, 9, 3> &N,           // Null space
         Eigen::Matrix<double, 6, 6> &K,           // = J*H (J - The 6x9 Jacobian of constraints)
-        const double &norm_threshold              // Used to discard columns of Pn when finding null space
+        double norm_threshold                     // Used to discard columns of Pn when finding null space
         )                                         // threshold for column vector norm (of Pn)
     {
         // Applying Gram-Schmidt orthogonalization on the Jacobian.
