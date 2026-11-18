@@ -93,20 +93,20 @@ namespace sqp_engine
         void (*NearestRotationMatrix)(const Eigen::Matrix<double, 9, 1> &e, Eigen::Matrix<double, 9, 1> &r);
 
         //! Construct an SQPConfig struct
-        inline SQPConfig(                                                                                                                             //
-            const double _sqp_squared_tolerance = DEFAULT_SQP_SQUARED_TOLERANCE,                                                                      //
-            const double _sqp_det_threshold = DEFAULT_SQP_DET_THRESHOLD,                                                                              //
-            const int _sqp_max_iteration = DEFAULT_SQP_MAX_ITERATION,                                                                                 //
-            const NearestRotationMethod &_nearest_rotation_method = DEFAULT_NEAREST_ROTATION_METHOD) : sqp_squared_tolerance(_sqp_squared_tolerance), //
-                                                                                                       sqp_det_threshold(_sqp_det_threshold),         //
-                                                                                                       sqp_max_iteration(_sqp_max_iteration)          //
+        inline SQPConfig(                                                                                                                            //
+            const double _sqp_squared_tolerance = DEFAULT_SQP_SQUARED_TOLERANCE,                                                                     //
+            const double _sqp_det_threshold = DEFAULT_SQP_DET_THRESHOLD,                                                                             //
+            const int _sqp_max_iteration = DEFAULT_SQP_MAX_ITERATION,                                                                                //
+            const NearestRotationMethod _nearest_rotation_method = DEFAULT_NEAREST_ROTATION_METHOD) : sqp_squared_tolerance(_sqp_squared_tolerance), //
+                                                                                                       sqp_det_threshold(_sqp_det_threshold),        //
+                                                                                                       sqp_max_iteration(_sqp_max_iteration)         //
         {
             // assign nearest rotation
             SetNearestRotationMethod(_nearest_rotation_method);
         }
 
         //! Assign nearest rotation method
-        inline void SetNearestRotationMethod(const NearestRotationMethod &_nearest_rotation_method)
+        inline void SetNearestRotationMethod(const NearestRotationMethod _nearest_rotation_method)
         {
             if (_nearest_rotation_method == NearestRotationMethod::FOAM)
             {
@@ -145,8 +145,6 @@ namespace sqp_engine
 
         //! Check cheirality
         bool enable_cheirality_check = true;
-        //! For cheirality checks in PnL
-        static const double PI;
 
         //! Compute Omega's null space based on the method specified by omega_nullspace_method
         void computeNullSpace(const Eigen::Matrix<double, 9, 9>& Omega, Eigen::Matrix<double, 9, 9>& U, Eigen::Matrix<double, 9, 1>& s) const
@@ -193,8 +191,8 @@ namespace sqp_engine
         Eigen::Matrix<double, 9, 1> r;     // Actual matrix upon convergence
         Eigen::Matrix<double, 9, 1> r_hat; // "Clean" (nearest) rotation matrix
         Eigen::Vector3d t;
-        int num_iterations;
-        double sq_error;
+        int num_iterations = 0;
+        double sq_error = 0.0;
     };
 
     inline std::ostream &operator<<(std::ostream &os, const SQPSolution &solution)
@@ -229,6 +227,7 @@ namespace sqp_engine
 
     /**
      * @brief Produce a distance from being orthogonal for a random 3x3 matrix (passed as a row-major 9x1 vector)
+     *        i.e., the squared Frobenius norm of A*A' - I
      *
      * @param a The 9x1 unrolled matrix vector
      * @return double The error
@@ -240,7 +239,6 @@ namespace sqp_engine
      *        (r is not necessarily a rotation but it must represent a rank-3 matrix)
      *        NOTE: K is lower-triangular, so upper triangle may contain trash (is not filled by the function)...
      *
-     * @param Omega The original QCQP 9x9 matrix
      * @param r The rotation matrix estimate (noty necessarily strictly a rotation)
      * @param H The return row space of the constraint Jacobian as a 9x6 matrix
      * @param N The null space of the constraint Jacobian as a 9x3 matrix
@@ -248,7 +246,6 @@ namespace sqp_engine
      * @param norm_threshold Used to discard columns of Pn when finding null space threshold for column vector norm (of Pn). Default value, 0.1.
      */
     void RowAndNullSpace(                         //
-        const Eigen::Matrix<double, 9, 9> &Omega, // The original QCQP matrix (does not change during SQP iteration)
         const Eigen::Matrix<double, 9, 1> &r,     // The current SQP estimate
         Eigen::Matrix<double, 9, 6> &H,           // Row space
         Eigen::Matrix<double, 9, 3> &N,           // Null space

@@ -1,3 +1,6 @@
+#include <limits>
+#include <algorithm>
+
 #include "sqp_engine.h"
 
 namespace sqp_engine
@@ -7,7 +10,6 @@ namespace sqp_engine
     const double EngineParameters::DEFAULT_ORTHOGONALITY_SQUARED_ERROR_THRESHOLD = 1e-8;
     const double EngineParameters::DEFAULT_EQUAL_VECTORS_SQUARED_DIFF = 1e-10;
     const double EngineParameters::DEFAULT_EQUAL_SQUARED_ERRORS_DIFF = 1e-6;
-    const double EngineParameters::PI = 3.14159265358979323846;
 
     const double SQPConfig::DEFAULT_SQP_SQUARED_TOLERANCE = 1e-10;
     const double SQPConfig::DEFAULT_SQP_DET_THRESHOLD = 1.001;
@@ -212,7 +214,6 @@ namespace sqp_engine
     }
 
     void RowAndNullSpace(                         //
-        const Eigen::Matrix<double, 9, 9> &Omega, // The original QCQP matrix
         const Eigen::Matrix<double, 9, 1> &r,     // The current SQP estimate
         Eigen::Matrix<double, 9, 6> &H,           // Row space
         Eigen::Matrix<double, 9, 3> &N,           // Null space
@@ -406,11 +407,13 @@ namespace sqp_engine
         Eigen::Vector3d &x)
     {
         double L[3 * 3], v[2];
+        // pivots are tested relative to A's scale, i.e. its trace
+        const double eps = 1E-10 * std::max(A(0, 0) + A(1, 1) + A(2, 2), std::numeric_limits<double>::min());
 
         // D is stored in L's diagonal, i.e. L[0], L[4], L[8]
         // its elements should be positive
         v[0] = L[0] = A(0, 0);
-        if (v[0] < 1E-10)
+        if (v[0] < eps)
             return 1;
         v[1] = 1.0 / v[0];
         L[3] = A(1, 0) * v[1];
@@ -419,7 +422,7 @@ namespace sqp_engine
 
         v[0] = L[3] * L[0];
         v[1] = L[4] = A(1, 1) - L[3] * v[0];
-        if (v[1] < 1E-10)
+        if (v[1] < eps)
             return 2;
         L[7] = (A(2, 1) - L[6] * v[0]) / v[1];
         // L[5] = 0.0;
@@ -427,7 +430,7 @@ namespace sqp_engine
         v[0] = L[6] * L[0];
         v[1] = L[7] * L[4];
         L[8] = A(2, 2) - L[6] * v[0] - L[7] * v[1];
-        if (L[8] < 1E-10)
+        if (L[8] < eps)
             return 3;
 
         // Forward solve L*x = b
@@ -458,7 +461,7 @@ namespace sqp_engine
         Eigen::Matrix<double, 9, 6> H;  // Row space of J
         Eigen::Matrix<double, 6, 6> JH; // The lower triangular matrix J*Q
 
-        RowAndNullSpace(Omega, r, H, N, JH);
+        RowAndNullSpace(r, H, N, JH);
 
         // Great, now if delta = H*x + N*y, we first compute x by solving:
         //
@@ -500,7 +503,8 @@ namespace sqp_engine
         if (AxbSolveLDLt3x3(W, rhs, y))
         {
             Eigen::Matrix3d Winv;
-            InvertSymmetric3x3(W, Winv);
+            const double trW = W.trace(); // W's scale
+            InvertSymmetric3x3(W, Winv, 1E-10 * trW * trW * trW);
             y = Winv * rhs;
         }
 
@@ -533,7 +537,9 @@ namespace sqp_engine
             solution.r = -r;
             det_r = -det_r;
         }
-        if (det_r > config.sqp_det_threshold)
+        // project onto SO(3) if the determinant exceeds the threshold or if r is not orthogonal,
+        // e.g., when SQP stopped at the maximum number of iterations without converging
+        if (det_r > config.sqp_det_threshold || OrthogonalityError(solution.r) > 1E-10)
         {
             config.NearestRotationMatrix(solution.r, solution.r_hat);
         }
